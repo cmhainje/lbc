@@ -9,11 +9,15 @@ from lbc.models import AutoEncoder
 
 from glob import glob
 from tqdm.auto import tqdm
+from os import makedirs
 
 
 # Parse number of epochs to train
 ap = argparse.ArgumentParser()
 ap.add_argument('n_epochs', default=10_000, type=int)
+ap.add_argument('-c', '--hidden_channels', default=4, type=int)
+ap.add_argument('-l', '--latent_dim', default=256, type=int)
+ap.add_argument('--save_freq', default=100, type=int)
 args = ap.parse_args()
 
 # Load images
@@ -25,7 +29,7 @@ print("Input data shape:", images.shape)
 
 # Create an AutoEncoder
 key = jax.random.PRNGKey(seed=120)
-model = AutoEncoder(hidden_channels=2, latent_dim=64, key=key)
+model = AutoEncoder(hidden_channels=args.hidden_channels, latent_dim=args.latent_dim, key=key)
 
 # Try running the images through the model
 output = jax.vmap(model)(images)
@@ -53,13 +57,13 @@ def train_step(model, opt_state, x):
     return model, opt_state, loss_value
 
 
-history = { "loss": [] }
+history = { "epoch": [], "loss": [] }
 
-CHECKPOINT_DIR = '/scratch/ch4407/lbc/checkpoints'
-
+CHECKPOINT_DIR = f'/scratch/ch4407/lbc/checkpoints/h{args.hidden_channels}_l{args.latent_dim:03d}'
+makedirs(CHECKPOINT_DIR, exist_ok=True)
 
 def save():
-    path = f'{CHECKPOINT_DIR}/checkpoint_{len(history["loss"])}.pkl'
+    path = f'{CHECKPOINT_DIR}/checkpoint_{history["epoch"][-1]}.pkl'
     print(f'Saving checkpoint at {path}')
     train_state = ( model, optim, opt_state, history )
     with open(path, 'wb') as f:
@@ -94,11 +98,23 @@ except OSError:
 init_loss = reco_loss(model, images)
 print("Initial loss:", init_loss)
 
+epoch_0 = history['epoch'][-1] if len(history['epoch']) > 0 else 0
+
 # Train
-for i in tqdm(range(args.n_epochs), desc="Training", unit="step"):
+n_epochs = args.n_epochs
+if (epoch_0 + n_epochs) % args.save_freq == 0:
+    n_epochs += 1
+
+for i in tqdm(range(n_epochs), desc="Training", unit="step"):
     model, opt_state, train_loss = train_step(model, opt_state, images)
-    history['loss'].append(train_loss)
+
+    if i % args.save_freq == 0:
+        history['epoch'].append(epoch_0 + i)
+        history['loss'].append(train_loss)
 
 print("Final loss:", history['loss'][-1])
+
 save()
+
+print("Done!")
 

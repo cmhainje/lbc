@@ -11,7 +11,7 @@
 module purge
 
 singularity exec --nv \
-    --overlay /home/ch4407/py/overlay-15GB-500K.ext3:rw \
+    --overlay /home/ch4407/py/overlay-15GB-500K.ext3:ro \
     /scratch/work/public/singularity/cuda11.8.86-cudnn8.7-devel-ubuntu22.04.2.sif* \
-    /bin/bash -c "source /ext3/env.sh; venv lbc; cd /home/ch4407/lbc/scripts; python train.py 100000"
+    /bin/bash -c "source /ext3/env.sh; venv lbc; cd /home/ch4407/lbc/scripts; python train.py 50000 -c 4 -l 128"
 
