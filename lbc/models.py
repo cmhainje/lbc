@@ -80,10 +80,10 @@ class Decoder(eqx.Module):
     def __call__(self, x):
         for layer in self.linear:
             x = layer(x)
-        x = x.reshape(-1, 4, 4)
+        x = x.reshape(-1, 16, 16)
         for layer in self.layers:
             x = layer(x)
-        return x * 5_000
+        return x
 
 
 class AutoEncoder(eqx.Module):
