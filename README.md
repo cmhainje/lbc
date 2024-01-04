@@ -21,6 +21,6 @@ pip install -e .
 ```
 
 Now, you should have access to `lbc` (for our models) and any dependences needed
-to run any script or notebook. If using Poetry, note that you must use `poetry
-run python scripts/...` to run a script or register your Poetry venv as a
-Jupyter kernel with your local Jupyter installation.
+to run any script or notebook. If using Poetry, note that you must use
+`poetry run python scripts/...` to run a script or register your Poetry venv as
+a Jupyter kernel with your local Jupyter installation.
