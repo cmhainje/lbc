@@ -14,10 +14,10 @@ building a generative model for BOSS spectrograph calibration data
 Right now, this repo contains only an autoencoder which learns a small chunk
 of a few arc images from a single night. 
 
-- `notebooks/preprocess_data.ipynb` shows how we process the arc exposures into
+- `notebooks/preprocess_data.ipynb` shows how arc images are processed into
   training data 
-- `lbc/models.py` shows our autoencoder architecture
-- `scripts/train.py` is our training script
+- `lbc/models.py` shows the autoencoder architecture
+- `scripts/train.py` is the training script
 - `notebooks/plot_training.ipynb` shows the results of training one example
   autoencoder
 
