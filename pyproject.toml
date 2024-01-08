@@ -21,6 +21,7 @@ ipywidgets = "^8.1.1"
 ipykernel = "^6.28.0"
 cloudpickle = "^3.0.0"
 requests = "^2.31.0"
+sdss-access = "^3.0.3"
 
 
 [build-system]
