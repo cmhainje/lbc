@@ -1,34 +1,27 @@
+import argparse
 import numpy as np
 import pandas as pd
 
 from astropy.io import fits
 
 from glob import glob
-from tqdm.auto import tqdm
-from os.path import join, basename
+from tqdm import tqdm
+from os import makedirs
+from os.path import join, basename, exists
 
 
-def extract_headers(folder):
-    try:
-        df = pd.read_csv(join(folder, "headers.csv"))
-    except FileNotFoundError:
-        filenames = sorted(glob(f"{folder}/*.fit.gz"))
-        headers = [None] * len(filenames)
-        for i, filename in enumerate(tqdm(filenames, desc="Reading headers")):
-            with fits.open(filename) as f:
-                headers[i] = dict(f[0].header)
-        df = pd.DataFrame(headers)
-        df.to_csv(join(folder, "headers.csv"))
+ap = argparse.ArgumentParser()
+ap.add_argument('src')
+ap.add_argument('dest')
+args = ap.parse_args()
 
-    return df
+file_list = sorted(glob(join(args.src, '*', '*')))
+print(len(file_list), 'files found.')
+
+makedirs(args.dest, exist_ok=True)
 
 
-def split_amplifiers(image_data, red=True):
-    # magic numbers are taken from
-    # https://data.sdss.org/datamodel/files/BOSS_SPECTRO_DATA/MJD/sdR.html
-    # note that the IDL slice syntax _includes_ the endpoint, so we add 1
-    # also the rows and columns are transposed relative to the docs
-
+def split_by_amplifier(image_data, red=True):
     if red:
         return (
             (
@@ -70,55 +63,71 @@ def split_amplifiers(image_data, red=True):
         )
 
 
-def get_cropped_image(filename):
-    img = fits.getdata(filename)
+def squash(X):
+    median = np.median(X[X != 0])
+    width = np.median(np.abs(X[X != 0] - median))
 
-    # split by amplifiers and subtract bias
-    camera = basename(filename).split("-")[1][1]
-    split = split_amplifiers(img, red=camera == "r")
-    bias_removed_quadrants = [d - np.median(b) for d, b in split]
+    vmin = max(median - 5 * width, 0)
+    vmax = median + 5 * width
 
-    # for now, let's just take a 128x128 square from the bottom-left quadrant
-    x = bias_removed_quadrants[2][800:928, 800:928]
-    return x
+    # clamp all data to between these values
+    X[X < vmin] = vmin
+    X[X > vmax] = vmax
 
-
-def process_arcs(folder, output_folder):
-    df = extract_headers(folder)
-    arcs = df.loc[df["FLAVOR"] == "arc"]
-    arc_exposures = np.unique(arcs["EXPOSURE"])
-
-    # find the interesting columns
-    cols_of_interest = [
-        x
-        for x in df.loc[:, df.nunique() > 1].columns
-        if x not in ["FILENAME", "CAMERAS", "EXPOSURE"]
-    ]
-
-    all_metadata = []
-
-    for exp_num in arc_exposures:
-        # for now, we're only looking at r2 data
-        exposure = df.loc[
-            (df["CAMERAS"] == "r2") & (df["EXPOSURE"] == exp_num)
-        ].squeeze()
-
-        # extract the metadata
-        metadata = exposure[cols_of_interest]
-
-        # extract a cropped image
-        filename = join(folder, exposure.FILENAME + ".gz")
-        image = get_cropped_image(filename)
-
-        # save
-        all_metadata.append(metadata)
-        out_filename = exposure.FILENAME.replace(".fit", ".npy")
-        np.save(join(output_folder, out_filename), image)
-
-    pd.DataFrame(all_metadata).to_csv(join(output_folder, "metadata.csv"))
+    # scale to [0, 1]
+    X -= vmin
+    X = X.astype(np.float64)
+    X /= (vmax - vmin)
+    return X
 
 
-if __name__ == "__main__":
-    process_arcs(
-        "/Users/connor/data/lbc/58540", "/Users/connor/data/lbc/58540-processed"
-    )
+
+def process(filename):
+    with fits.open(filename) as f:
+        meta = dict(f[0].header)
+        img  = f[0].data
+
+#     splits = split_by_amplifier(img, red=meta['CAMERAS'] == 'r1')
+
+#     quads = []
+#     for data, bias in splits:
+#         quad = np.copy(data).astype(np.int32)  # unsigned -> signed int
+
+#         # look for rows that are completely blanked out
+#         rows = quad.sum(1)
+#         mask = rows != 0
+
+#         # do bias subtraction only on rows with data
+#         quad[mask] -= np.median(bias[mask]).astype(np.uint16)
+#         quads.append(quad)
+
+#     s_quads = [squash(q) for q in quads]
+#     final = s_quads[2][800:928, 800:928]
+
+    # no need to process the other quadrants right now
+    d, b = split_by_amplifier(img, red=meta['CAMERAS'] == 'r1')[2]
+    d = d.astype(np.int32)
+    mask = d.sum(1) != 0
+    d[mask] -= np.median(b[mask]).astype(np.uint16)
+    final = squash(d)[800:928, 800:928]
+
+    return meta, final
+
+
+all_metadata = []
+meta_path = join(args.dest, 'metadata.csv')
+
+for fname in tqdm(file_list):
+    meta, img = process(fname)
+    all_metadata.append(meta)
+
+    # new filename
+    mjd    = meta['MJD']
+    camera = meta['CAMERAS']
+    frame  = f"{int(meta['EXPOSURE']):08d}"
+
+    out_name = f"{mjd}-{camera}-{frame}.npy"
+    np.save(join(args.dest, out_name), img)
+
+df = pd.DataFrame(all_metadata)
+df.to_csv(meta_path, mode='a', index=False, header=(not exists(meta_path)))
