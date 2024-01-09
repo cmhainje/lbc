@@ -302,20 +302,6 @@ toolz = ">=0.9.0"
 typing-extensions = ">=4.2.0"
 
 [[package]]
-name = "click"
-version = "8.1.7"
-description = "Composable command line interface toolkit"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
-    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
-]
-
-[package.dependencies]
-colorama = {version = "*", markers = "platform_system == \"Windows\""}
-
-[[package]]
 name = "cloudpickle"
 version = "3.0.0"
 description = "Pickler class to extend the standard pickle.Pickler functionality"
@@ -353,21 +339,6 @@ traitlets = ">=4"
 
 [package.extras]
 test = ["pytest"]
-
-[[package]]
-name = "configparser"
-version = "6.0.0"
-description = "Updated configparser from stdlib for earlier Pythons."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "configparser-6.0.0-py3-none-any.whl", hash = "sha256:900ea2bb01b2540b1a644ad3d5351e9b961a4a012d4732f619375fb8f641ee19"},
-    {file = "configparser-6.0.0.tar.gz", hash = "sha256:ec914ab1e56c672de1f5c3483964e68f71b34e457904b7b76e06b922aec067a8"},
-]
-
-[package.extras]
-docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff", "types-backports"]
 
 [[package]]
 name = "contourpy"
@@ -446,23 +417,6 @@ files = [
 [package.extras]
 docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
-
-[[package]]
-name = "daemonocle"
-version = "1.2.3"
-description = "A Python library for creating super fancy Unix daemons"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "daemonocle-1.2.3.tar.gz", hash = "sha256:741ce6abc37c85ca396379a0d45710ac27ab5f17eeaadbc64a0f5cc4c4f666ea"},
-]
-
-[package.dependencies]
-click = "*"
-psutil = "*"
-
-[package.extras]
-test = ["coveralls", "flake8", "flake8-bugbear", "flake8-isort", "pytest", "pytest-cov"]
 
 [[package]]
 name = "debugpy"
@@ -606,17 +560,6 @@ python-versions = ">=3.5"
 files = [
     {file = "idna-3.6-py3-none-any.whl", hash = "sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f"},
     {file = "idna-3.6.tar.gz", hash = "sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca"},
-]
-
-[[package]]
-name = "invoke"
-version = "2.2.0"
-description = "Pythonic task execution"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "invoke-2.2.0-py3-none-any.whl", hash = "sha256:6ea924cc53d4f78e3d98bc436b08069a03077e6f85ad1ddaa8a116d7dad15820"},
-    {file = "invoke-2.2.0.tar.gz", hash = "sha256:ee6cbb101af1a859c7fe84f2a264c059020b0cb7fe3535f9424300ab568f6bd5"},
 ]
 
 [[package]]
@@ -989,30 +932,6 @@ files = [
 ]
 
 [[package]]
-name = "markdown-it-py"
-version = "3.0.0"
-description = "Python port of markdown-it. Markdown parsing, done right!"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"},
-    {file = "markdown_it_py-3.0.0-py3-none-any.whl", hash = "sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1"},
-]
-
-[package.dependencies]
-mdurl = ">=0.1,<1.0"
-
-[package.extras]
-benchmarking = ["psutil", "pytest", "pytest-benchmark"]
-code-style = ["pre-commit (>=3.0,<4.0)"]
-compare = ["commonmark (>=0.9,<1.0)", "markdown (>=3.4,<4.0)", "mistletoe (>=1.0,<2.0)", "mistune (>=2.0,<3.0)", "panflute (>=2.3,<3.0)"]
-linkify = ["linkify-it-py (>=1,<3)"]
-plugins = ["mdit-py-plugins"]
-profiling = ["gprof2dot"]
-rtd = ["jupyter_sphinx", "mdit-py-plugins", "myst-parser", "pyyaml", "sphinx", "sphinx-copybutton", "sphinx-design", "sphinx_book_theme"]
-testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
-
-[[package]]
 name = "matplotlib"
 version = "3.8.2"
 description = "Python plotting package"
@@ -1073,17 +992,6 @@ files = [
 
 [package.dependencies]
 traitlets = "*"
-
-[[package]]
-name = "mdurl"
-version = "0.1.2"
-description = "Markdown URL utilities"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
-    {file = "mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"},
-]
 
 [[package]]
 name = "ml-dtypes"
@@ -1574,17 +1482,6 @@ files = [
 six = ">=1.5"
 
 [[package]]
-name = "python-json-logger"
-version = "2.0.7"
-description = "A python library adding a json log formatter"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "python-json-logger-2.0.7.tar.gz", hash = "sha256:23e7ec02d34237c5aa1e29a070193a4ea87583bb4e7f8fd06d3de8264c4b2e1c"},
-    {file = "python_json_logger-2.0.7-py3-none-any.whl", hash = "sha256:f380b826a991ebbe3de4d897aeec42760035ac760345e57b812938dc8b35e2bd"},
-]
-
-[[package]]
 name = "pytz"
 version = "2023.3.post1"
 description = "World timezone definitions, modern and historical"
@@ -1804,24 +1701,6 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
-name = "rich"
-version = "13.7.0"
-description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-optional = false
-python-versions = ">=3.7.0"
-files = [
-    {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
-    {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
-]
-
-[package.dependencies]
-markdown-it-py = ">=2.2.0"
-pygments = ">=2.13.0,<3.0.0"
-
-[package.extras]
-jupyter = ["ipywidgets (>=7.5.1,<9)"]
-
-[[package]]
 name = "scipy"
 version = "1.11.4"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -1862,71 +1741,6 @@ numpy = ">=1.21.6,<1.28.0"
 dev = ["click", "cython-lint (>=0.12.2)", "doit (>=0.36.0)", "mypy", "pycodestyle", "pydevtool", "rich-click", "ruff", "types-psutil", "typing_extensions"]
 doc = ["jupytext", "matplotlib (>2)", "myst-nb", "numpydoc", "pooch", "pydata-sphinx-theme (==0.9.0)", "sphinx (!=4.1.0)", "sphinx-design (>=0.2.0)"]
 test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
-
-[[package]]
-name = "sdss-access"
-version = "3.0.3"
-description = "Package to dynamically build filepaths and access all SDSS SAS products"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "sdss-access-3.0.3.tar.gz", hash = "sha256:3286280ee38e9639e190393956bb35a9ce9064ae0cbc29f21b5a5786201b36bc"},
-    {file = "sdss_access-3.0.3-py2.py3-none-any.whl", hash = "sha256:9a5891e5ed807d4b71bf95f18de8970c5c7c78c137c830268bfeb6915ecbb9e3"},
-]
-
-[package.dependencies]
-requests = ">=2.10.0"
-sdss-tree = ">=4.0.0"
-sdsstools = ">=0.4.5"
-six = ">=1.11"
-tqdm = ">=4.46.0"
-
-[package.extras]
-dev = ["Jinja2 (<=3.0)", "Sphinx (>=7.1.0)", "codecov (>=2.0.2dev5)", "coverage[toml] (>=5.0)", "coveralls (>=1.7)", "doc8 (>=0.8.0)", "flake8 (>=3.7.9)", "importlib-metadata (>=1.6.0)", "invoke (>=1.3.0)", "ipdb (>=0.12.3)", "ipython (>=7.9.0)", "isort (>=4.3.21)", "matplotlib (>=3.1.1)", "pytest (>=5.2.2)", "pytest-cov (>=2.8.1)", "pytest-mock (>=1.13.0)", "pytest-sugar (>=0.9.2)", "recommonmark (>=0.6)", "sdsstools[dev] (>=0.4.0)", "sphinx-bootstrap-theme (>=0.4.12)", "sphinx-issues (>=1.2.0)", "twine (>=3.1.1)", "wheel (>=0.33.6)"]
-docs = ["Jinja2 (<=3.0)", "Sphinx (>=7.1.0)", "importlib-metadata (>=1.6.0)", "recommonmark (>=0.6)", "sphinx-bootstrap-theme (>=0.4.12)", "sphinx-issues (>=1.2.0)"]
-
-[[package]]
-name = "sdss-tree"
-version = "4.0.5"
-description = "Control and setup of SDSS tree environment and modules"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "sdss-tree-4.0.5.tar.gz", hash = "sha256:0b3f281f446742459ff23e621845b7a8f5b644145b1e308af3e6f759bc199fe6"},
-    {file = "sdss_tree-4.0.5-py2.py3-none-any.whl", hash = "sha256:39def60e5dd80b8d00d24096a1409b63d900e80f85ec2da429fd1b674f605027"},
-]
-
-[package.dependencies]
-configparser = ">=3.5.0"
-pygments = ">=2.6"
-sdsstools = ">=0.4.5"
-
-[package.extras]
-dev = ["Sphinx (>=7.2.0)", "codecov (>=2.0.15)", "coverage[toml] (>=5.0)", "coveralls (>=1.7)", "doc8 (>=0.8.0)", "flake8 (>=3.7.9)", "importlib-metadata (>=1.6.0)", "invoke (>=1.3.0)", "ipdb (>=0.12.3)", "ipython (>=7.9.0)", "isort (>=4.3.21)", "jinja2 (<3.1)", "matplotlib (>=3.1.4)", "pytest (>=5.2.2)", "pytest-cov (>=2.8.1)", "pytest-mock (>=1.13.0)", "pytest-sugar (>=0.9.2)", "recommonmark (>=0.6)", "sdsstools[dev] (>=0.4.0)", "six (>=1.14)", "sphinx-argparse (>=0.2.5)", "sphinx-bootstrap-theme (>=0.4.12)", "sphinx-issues (>=1.2.0)", "twine (>=3.1.4)", "wheel (>=0.33.6)"]
-docs = ["Sphinx (>=7.2.0)", "importlib-metadata (>=1.6.0)", "jinja2 (<3.1)", "recommonmark (>=0.6)", "six (>=1.14)", "sphinx-argparse (>=0.2.5)", "sphinx-bootstrap-theme (>=0.4.12)", "sphinx-issues (>=1.2.0)"]
-
-[[package]]
-name = "sdsstools"
-version = "1.6.1"
-description = "Small tools for SDSS products"
-optional = false
-python-versions = ">=3.8,<4.0"
-files = [
-    {file = "sdsstools-1.6.1-py3-none-any.whl", hash = "sha256:61b1670bb522917efc5bd67420eda5445368773dc781e5b7e9dfe797de1e6d96"},
-    {file = "sdsstools-1.6.1.tar.gz", hash = "sha256:844d75766c4c3b563d35aabef6ecabe5327e4d3f586de1d62245aaccba524e19"},
-]
-
-[package.dependencies]
-astropy = {version = ">=5.0.0", markers = "python_version >= \"3.10\" and python_version < \"4.0\""}
-daemonocle = ">=1.0.2,<2.0.0"
-invoke = ">=2.0.0,<3.0.0"
-numpy = {version = ">=1.26.0", markers = "python_version >= \"3.10\" and python_version < \"4.0\""}
-packaging = ">=20.4"
-pygments = ">=2.5.2,<3.0.0"
-python-json-logger = ">=2.0.7,<3.0.0"
-pyyaml = ">=4.0"
-rich = ">=13.4.2,<14.0.0"
-typing-extensions = ">=4.6.3,<5.0.0"
 
 [[package]]
 name = "setuptools"
@@ -2118,4 +1932,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "e1446a29c6f25f5ad86ccd4ba8cdf259929bd20fabaca159c1ffb18c0bc564cd"
+content-hash = "d495af5312f03c42d43e5b72115960aa28e6c75892560ef03abb9d698156dfdf"
