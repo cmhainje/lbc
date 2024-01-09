@@ -69,7 +69,7 @@ rsync_cmd = [
 print("Running the following rsync command:")
 print(f"  {' '.join(rsync_cmd)}")
 
-result = subprocess.run(
+process = subprocess.Popen(
     rsync_cmd,
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
@@ -77,10 +77,24 @@ result = subprocess.run(
     text=True
 )
 
-print("return code:")
-print(result.returncode)
-print("stdout:")
-print(result.stdout)
-print("stderr:")
-print(result.stderr)
+with process.stdout:
+    for line in iter(process.stdout.readline, b''):
+        print(line.strip())
+
+# Wait for the process to complete and get the remaining output
+stdout, stderr = process.communicate()
+
+# Print the remaining output
+print(stdout)
+print(stderr)
+
+if process.returncode != 0:
+    print("rsync failed with return code", process.returncode)
+
+# print("return code:")
+# print(result.returncode)
+# print("stdout:")
+# print(result.stdout)
+# print("stderr:")
+# print(result.stderr)
 
