@@ -79,6 +79,8 @@ process = subprocess.Popen(
 
 with process.stdout:
     for line in iter(process.stdout.readline, b''):
+        if not line:
+            break
         print(line.strip())
 
 # Wait for the process to complete and get the remaining output
