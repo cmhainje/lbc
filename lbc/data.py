@@ -6,22 +6,35 @@ from tqdm import tqdm
 DATA_DIR = '/scratch/ch4407/lbc/data-processed'
 
 
-def load(num=None, which='arc', seed=0):
+def _normalize_flavor(flavor):
+    flavor = flavor.lower()
+    if flavor not in ['arc', 'flat']:
+        raise ValueError(f"Value of `flavor` ({flavor}) unknown.")
+    return flavor
+
+
+def _normalize_camera(camera):
+    camera = camera.lower()[0]
+    if camera not in ['r', 'b']:
+        raise ValueError(f"Value of `camera` ({camera}) unknown.")
+    return camera
+
+
+def load_images(num: int | None=None, flavor='arc', camera='r', seed=0):
     """Load `num` images. If `num` is None, loads them all."""
     rng = np.random.default_rng(seed)
 
-    if 'arc' in which.lower():
-        file_list = sorted(glob(f'{DATA_DIR}/arcs/*.npy'))
-    elif 'flat' in which.lower():
-        file_list = sorted(glob(f'{DATA_DIR}/flats/*.npy'))
-    else:
-        raise ValueError(f"Value of `which` ({which}) unknown.")
-    
-    file_list = np.array(file_list)
+    flavor = _normalize_flavor(flavor)
+    camera = _normalize_camera(camera)
+
+    file_list = np.array(sorted(glob(f'{DATA_DIR}/{flavor}s/*-{camera}1-*.npy')))
     rng.shuffle(file_list)
 
-    if num is not None and num < len(file_list):
-        file_list = file_list[:num]
+    if num is not None:
+       if num < len(file_list):
+           file_list = file_list[:num]
+       else:
+           print('Warning: `num` is larger than the number of files available. Returning all.')
 
     # Now that we've specified which files we want to load, let's load them
     images = np.stack([
@@ -29,6 +42,23 @@ def load(num=None, which='arc', seed=0):
     ]).reshape(-1, 1, 128, 128)
 
     return images
+
+
+def load(flavor='arc', camera='r'):
+    """Loads cached train/val/test datasets."""
+    flavor = _normalize_flavor(flavor)
+    camera = _normalize_camera(camera)
+    filename = f"{DATA_DIR}/train-{flavor}-{camera}.npz"
+
+    try:
+        with np.load(filename) as data:
+            return data['train'], data['val'], data['test']
+    except OSError:
+        print(f"Couldn't find cached dataset at {filename}. Generating...")
+        train, val, test = split(load_images(flavor=flavor, camera=camera))
+        np.savez(filename, train=train, val=val, test=test)
+        print(f"Saved dataset at {filename}!")
+        return train, val, test
 
 
 def split(*args, train_frac=0.8, val_frac=0.1, test_frac=0.1, seed=0):
@@ -76,4 +106,3 @@ def dataloader(*args, batch_size=64, seed=0):
                 yield (x[batch_perm] for x in args)
             start = end
             end = start + batch_size
-
