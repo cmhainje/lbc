@@ -23,6 +23,15 @@ cloudpickle = "^3.0.0"
 requests = "^2.31.0"
 
 
+[virtualenvs]
+in-project = true
+
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
