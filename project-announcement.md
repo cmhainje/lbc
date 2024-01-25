@@ -2,7 +2,7 @@
 
 ## Title
 
-Reducing calibration overheads with a generative model for calibration data
+Reducing calibration overheads with a generative model for spectrograph calibration data
 
 ## Description
 
