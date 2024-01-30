@@ -123,4 +123,4 @@ def split_by_amplifier(X, red=True):
 
     quads  = [X[r_lo:r_hi, c_lo:c_hi] for (c_lo, c_hi) in cols for (r_lo, r_hi) in rows]
     biases = [X[r_lo:r_hi, b_lo:b_hi] for (b_lo, b_hi) in bias for (r_lo, r_hi) in rows]
-    return ((q, b) for q, b in zip(quads, biases))
+    return [(q, b) for q, b in zip(quads, biases)]
