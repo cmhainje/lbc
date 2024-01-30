@@ -106,3 +106,21 @@ def dataloader(*args, batch_size=64, seed=0):
                 yield (x[batch_perm] for x in args)
             start = end
             end = start + batch_size
+
+
+def split_by_amplifier(X, red=True):
+    """from https://data.sdss.org/datamodel/files/BOSS_SPECTRO_DATA/MJD/sdR.html
+    note that indices therein are transposed and endpoint-inclusive"""
+
+    if red:
+        rows = [ ( 48, 2111 + 1), (2112, 4175 + 1) ]
+        cols = [ (119, 2175 + 1), (2176, 4232 + 1) ]
+        bias = [ ( 10,  100 + 1), (4250, 4340 + 1) ]
+    else:
+        rows = [ ( 56, 2111 + 1), (2112, 4167 + 1) ]
+        cols = [ (128, 2175 + 1), (2176, 4223 + 1) ]
+        bias = [ ( 10,   67 + 1), (4284, 4340 + 1) ]
+
+    quads  = [X[r_lo:r_hi, c_lo:c_hi] for (c_lo, c_hi) in cols for (r_lo, r_hi) in rows]
+    biases = [X[r_lo:r_hi, b_lo:b_hi] for (b_lo, b_hi) in bias for (r_lo, r_hi) in rows]
+    return ((q, b) for q, b in zip(quads, biases))
