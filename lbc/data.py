@@ -1,9 +1,15 @@
 import numpy as np
+import pandas as pd
 from glob import glob
 from tqdm import tqdm
+from os.path import join
 
 
+RAW_DIR = '/scratch/ch4407/lbc/data'
 DATA_DIR = '/scratch/ch4407/lbc/data-processed'
+
+
+# *** UTILITIES FOR WORKING WITH PROCESSED DATA ***
 
 
 def _normalize_flavor(flavor):
@@ -20,52 +26,52 @@ def _normalize_camera(camera):
     return camera
 
 
-def load_images(num: int | None=None, flavor='arc', camera='r', seed=0):
-    """Load `num` images. If `num` is None, loads them all."""
-    rng = np.random.default_rng(seed)
-
-    flavor = _normalize_flavor(flavor)
-    camera = _normalize_camera(camera)
-
-    file_list = np.array(sorted(glob(f'{DATA_DIR}/{flavor}s/*-{camera}1-*.npy')))
-    rng.shuffle(file_list)
-
-    if num is not None:
-       if num < len(file_list):
-           file_list = file_list[:num]
-       else:
-           print('Warning: `num` is larger than the number of files available. Returning all.')
-
-    # Now that we've specified which files we want to load, let's load them
-    images = np.stack([
-        np.load(f) for f in tqdm(file_list, desc="Loading images")
-    ]).reshape(-1, 1, 128, 128)
-
-    return images
+def _normalize_which(which):
+    which = which.lower()
+    if which not in ['train', 'val', 'test']:
+        raise ValueError(f"Value of `which` ({which}) unknown.")
+    return which
 
 
-def load(flavor='arc', camera='r'):
+def load(which='train', flavor='arc', camera='r'):
     """Loads cached train/val/test datasets."""
     flavor = _normalize_flavor(flavor)
     camera = _normalize_camera(camera)
-    filename = f"{DATA_DIR}/train-{flavor}-{camera}.npz"
+    which  = _normalize_which(which)
 
-    try:
-        with np.load(filename) as data:
-            return data['train'], data['val'], data['test']
-    except OSError:
-        print(f"Couldn't find cached dataset at {filename}. Generating...")
-        train, val, test = split(load_images(flavor=flavor, camera=camera))
-        np.savez(filename, train=train, val=val, test=test)
-        print(f"Saved dataset at {filename}!")
-        return train, val, test
+    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    images = np.load(prefix + 'images.npy')
+    metadata = pd.read_csv(prefix + 'metadata.csv', sep=';')
+    return images, metadata
+
+
+def load_images(which='train', flavor='arc', camera='r'):
+    """Loads cached train/val/test datasets."""
+    flavor = _normalize_flavor(flavor)
+    camera = _normalize_camera(camera)
+    which  = _normalize_which(which)
+
+    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    images = np.load(prefix + 'images.npy')
+    return images
+
+
+def load_metadata(which='train', flavor='arc', camera='r'):
+    """Loads cached train/val/test datasets."""
+    flavor = _normalize_flavor(flavor)
+    camera = _normalize_camera(camera)
+    which  = _normalize_which(which)
+
+    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    metadata = pd.read_csv(prefix + 'metadata.csv', sep=';')
+    return metadata
 
 
 def split(*args, train_frac=0.8, val_frac=0.1, test_frac=0.1, seed=0):
     """Split dataset(s) into train/val/test sets."""
     rng = np.random.default_rng(seed)
 
-    lengths = set( x.shape[0] for x in args )
+    lengths = set( len(x) for x in args )
     if len(lengths) != 1:
         raise ValueError("arrays don't have the same size")
     N = lengths.pop()
@@ -108,6 +114,8 @@ def dataloader(*args, batch_size=64, seed=0):
             end = start + batch_size
 
 
+# *** UTILITIES FOR WORKING WITH RAW DATA ***
+
 def split_by_amplifier(X, red=True):
     """from https://data.sdss.org/datamodel/files/BOSS_SPECTRO_DATA/MJD/sdR.html
     note that indices therein are transposed and endpoint-inclusive"""
@@ -124,3 +132,43 @@ def split_by_amplifier(X, red=True):
     quads  = [X[r_lo:r_hi, c_lo:c_hi] for (c_lo, c_hi) in cols for (r_lo, r_hi) in rows]
     biases = [X[r_lo:r_hi, b_lo:b_hi] for (b_lo, b_hi) in bias for (r_lo, r_hi) in rows]
     return [(q, b) for q, b in zip(quads, biases)]
+
+
+def bias_subtract(d, b):
+    """subtract the median bias value from the data only in rows where data exists
+    (converts data from unsigned to signed ints in case data-bias is negative)"""
+    row_mask = (np.count_nonzero(d, axis=1) != 0)
+    bsub = np.copy(d).astype(np.int32)
+    bsub[row_mask] -= np.median(b[row_mask]).astype(np.uint16)
+    return bsub
+
+
+def squash(image):
+    """given a bias-subtracted image, normalize pixel values approximately into the interval (0, 1)
+    (note: normalization is nonlinear, some values may be slightly negative)"""
+    x = np.copy(image).astype(np.float64)
+    mask = np.count_nonzero(x, axis=1) > 0
+    x[mask] -= np.percentile(x[mask], 0.01)
+    x[mask] /= np.percentile(x[mask], 99.9)
+    x[mask] = np.tanh(2 * x[mask])
+    return x
+
+
+def wrangle_image(filename):
+    from astropy.io import fits
+
+    # load and process the image
+    image = fits.getdata(filename)
+
+    # in the future if we want to process all the quadrants, here's what it will look like
+    # quads = split_by_amplifier(image, red=('-r-' in filename))
+    # quads = [bias_subtract(d, b) for d, b in quads]
+    # quads = [squash(q) for q in quads]
+
+    # for now, we only care about the bottom left quadrant
+    x = squash(
+        bias_subtract(
+            *split_by_amplifier(image, red=('-r-' in filename))[2]
+        )
+    )
+    return x[800:928, 800:928]
