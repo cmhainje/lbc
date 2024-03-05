@@ -6,7 +6,7 @@ import cloudpickle
 import argparse
 
 from lbc.models import AutoEncoder
-from lbc.data import load as load_data, dataloader
+from lbc.data import load_images, dataloader
 
 from glob import glob
 from tqdm.auto import tqdm
@@ -23,21 +23,33 @@ ap.add_argument('--save_freq', default=100, type=int)
 ap.add_argument('--checkpoint_freq', default=10000, type=int)
 args = ap.parse_args()
 
-X_train, X_val, X_test = load_data(camera=args.camera)
+X_train = load_images(which='train', camera=args.camera)
+X_val   = load_images(which='val',   camera=args.camera)
 
 
 # Make a loss function (just MSE between the images)
+# def reco_loss(model, x):
+#     x_hat = jax.vmap(model)(x)
+#     mse = ((x_hat - x) ** 2).mean()
+#     return mse
+
+
+def invert(x):
+    return 0.5 * jax.numpy.arctanh(x)
+
+
+# MSE between the images _without_ tanh to squash large values near 1
 def reco_loss(model, x):
     x_hat = jax.vmap(model)(x)
-    mse = ((x_hat - x) ** 2).mean()
+    mse = ((invert(x_hat) - invert(x)) ** 2).mean()
     return mse
 
 
 # Instantiate model and optimizer
-key = jax.random.PRNGKey(seed=120)
+key = jax.random.PRNGKey(seed=1126 if args.camera == 'r' else 120)
 model = AutoEncoder(hidden_channels=args.hidden_channels, latent_dim=args.latent_dim, key=key)
 eta = 1e-4
-optim = optax.adamw(eta)
+optim = optax.adamw(eta, weight_decay=0.005)
 opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
 
@@ -51,7 +63,7 @@ def train_step(model, opt_state, x):
 
 history = { "epoch": [], "loss": [], "loss_val": [] }
 
-CHECKPOINT_DIR = f'/scratch/ch4407/lbc/checkpoints_{args.camera}/h{args.hidden_channels}_l{args.latent_dim:03d}'
+CHECKPOINT_DIR = f'/scratch/ch4407/lbc/experiments/tanh_arctanh_1e-4_{args.camera}_h{args.hidden_channels}_l{args.latent_dim:03d}'
 makedirs(CHECKPOINT_DIR, exist_ok=True)
 
 def save():
@@ -66,7 +78,7 @@ def load(path=None):
     if path is None:
         ckpts = glob(f'{CHECKPOINT_DIR}/checkpoint_*.pkl')
         if len(ckpts) > 0:
-            n_epochs = [ int(c.split('_')[1].split('.')[0]) for c in ckpts ]
+            n_epochs = [ int(c.split('_')[-1].split('.')[0]) for c in ckpts ]
             most_recent = np.argmax(n_epochs)
             path = ckpts[most_recent]
 
@@ -98,6 +110,9 @@ for i, batch in tqdm(
 ):
     batch = jax.numpy.array(batch)
     model, opt_state, train_loss = train_step(model, opt_state, batch)
+
+    if np.isnan(train_loss):
+        raise RuntimeError("NaN encountered")
 
     step_num = i + 1
     if step_num % args.save_freq == 0:
