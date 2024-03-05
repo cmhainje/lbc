@@ -11,7 +11,7 @@ from typing import Optional
 # https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/08-deep-autoencoders.html
 
 
-class Encoder(eqx.Module):
+class _Encoder(eqx.Module):
     layers: list
 
     def __init__(
@@ -43,7 +43,7 @@ class Encoder(eqx.Module):
         return x
 
 
-class Decoder(eqx.Module):
+class _Decoder(eqx.Module):
     linear: list
     layers: list
 
@@ -74,8 +74,7 @@ class Decoder(eqx.Module):
             ConvTranspose2d(chan, chan, key=keys[5], **convT_kw),  # 64x64 -> 128x128
             jax.nn.relu,
             Conv2d(chan, 1, key=keys[6], **conv_kw),
-            # jax.nn.sigmoid,  # ensure image data between 0 and 1
-            jax.lax.tanh,  # ensure image data between -1 and 1
+            jax.lax.tanh  # ensure image data between -1 and 1
         ]
 
     def __call__(self, x):
@@ -88,8 +87,8 @@ class Decoder(eqx.Module):
 
 
 class AutoEncoder(eqx.Module):
-    encoder: Encoder
-    decoder: Decoder
+    encoder: _Encoder
+    decoder: _Decoder
 
     def __init__(
         self, hidden_channels=4, latent_dim=256, key: Optional[PRNGKeyArray] = None
@@ -98,8 +97,8 @@ class AutoEncoder(eqx.Module):
             raise ValueError("key cant actually be None")
         keys = jax.random.split(key, 2)
 
-        self.encoder = Encoder(hidden_channels, latent_dim, key=keys[0])
-        self.decoder = Decoder(hidden_channels, latent_dim, key=keys[1])
+        self.encoder = _Encoder(hidden_channels, latent_dim, key=keys[0])
+        self.decoder = _Decoder(hidden_channels, latent_dim, key=keys[1])
 
     def __call__(self, x):
         z = self.encoder(x)
