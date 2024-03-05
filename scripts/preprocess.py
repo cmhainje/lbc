@@ -18,12 +18,19 @@ ap.add_argument('dest')
 ap.add_argument('-c', '--camera', default='r', choices=['r', 'b'])
 args = ap.parse_args()
 
+print(f"LBC Data Preprocessing")
+print(f"Arguments read:")
+print(f"  src:    {args.src}")
+print(f"  dest:   {args.dest}")
+print(f"  camera: {args.camera}")
+print(f"")
+
 makedirs(args.dest, exist_ok=True)
 
 # Make train/val/test file lists
 file_list = sorted(glob(join(args.src, '*', f'*-{args.camera}1-*')))
 print(len(file_list), 'files found.')
-files_split = dutil.split(file_list)
+files_split = dutil.split(np.array(file_list), seed=120)
 
 
 def process_file_list(files, outname='train'):
@@ -48,3 +55,6 @@ def process_file_list(files, outname='train'):
 for files, label in zip(files_split, ['train', 'val', 'test']):
     print(f'Processing {label} set ({len(files)} images):')
     process_file_list(files, f'{label}_{args.camera}')
+
+print("Done!")
+
