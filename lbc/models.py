@@ -74,7 +74,8 @@ class Decoder(eqx.Module):
             ConvTranspose2d(chan, chan, key=keys[5], **convT_kw),  # 64x64 -> 128x128
             jax.nn.relu,
             Conv2d(chan, 1, key=keys[6], **conv_kw),
-            jax.nn.sigmoid,  # ensure image data between 0 and 1
+            # jax.nn.sigmoid,  # ensure image data between 0 and 1
+            jax.lax.tanh,  # ensure image data between -1 and 1
         ]
 
     def __call__(self, x):
