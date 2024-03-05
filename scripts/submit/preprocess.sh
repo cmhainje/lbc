@@ -13,9 +13,14 @@
 
 module purge
 
+RAW_DIR=/scratch/ch4407/lbc/data/arcs
+PROC_DIR=/scratch/ch4407/lbc/data-processed/arcs
+
 singularity exec --nv \
     --overlay /home/ch4407/py/overlay-15GB-500K.ext3:ro \
     /scratch/work/public/singularity/ubuntu-20.04.4.sif* \
-    /bin/bash -c "source /ext3/env.sh; venv lbc; cd /home/ch4407/lbc/scripts; python preprocess.py /scratch/ch4407/lbc/data/2023_11/arcs /scratch/ch4407/lbc/data-processed/arcs"
-
+    /bin/bash -c \
+    "source /ext3/env.sh; venv lbc; cd /home/ch4407/lbc/scripts; \
+    python preprocess.py $RAW_DIR $PROC_DIR --camera r && \
+    python preprocess.py $RAW_DIR $PROC_DIR --camera b"
 
