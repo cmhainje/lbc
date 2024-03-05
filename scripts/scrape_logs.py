@@ -51,7 +51,7 @@ print('Log file downloaded.')
 # First we look for the BOSS data summary tables
 start = r'---- BOSS Data Summary ----'  # this goes before the table
 stop = r'---- ([^^\n]+?) ----'  # just look for the next header
-pattern = re.compile(r'^(?<!>)' + start + r'(.*?)' + stop,
+pattern = re.compile(r'^(?<!> )' + start + r'(.*?)' + stop,
                      re.DOTALL | re.MULTILINE)  # made with ChatGPT
 matches = pattern.findall(r.text)
 
@@ -74,6 +74,8 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
         table = lines[4:]
 
         mjd = message.split('/')[-1]
+        if mjd in arcs and mjd in flats:
+            continue
 
         arc_frames, flat_frames = set(), set()
         for line in table:
@@ -82,8 +84,9 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
                 frame_num = chunks[2].split('-')[1]
                 flav = chunks[5]
             except:
+                # print("Error encountered:")
                 print(chunks)
-                print('---')
+                # print('\n===\n')
                 print(match)
                 raise RuntimeError('borked!')
             if flav == 'arc':
@@ -93,6 +96,9 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
 
         arcs[mjd] = sorted(list(arc_frames))
         flats[mjd] = sorted(list(flat_frames))
+
+    elif lines[0].startswith(">"):
+        continue
 
     else:
         if (
@@ -107,12 +113,20 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
 
         mjd = table[0].split()[0]
 
+        if mjd in arcs and mjd in flats:
+            continue
+
         arc_frames, flat_frames = set(), set()
         for line in table:
+            if line.startswith('>') or line.startswith('-'):
+                continue
             try:
                 exp, flav, _, _, _ = line.split()[-5:]
             except:
+                print(header)
+                print("===")
                 print(line)
+                print("===")
                 print(match[0])
                 raise RuntimeError('borked!')
             if flav == 'Arc':
