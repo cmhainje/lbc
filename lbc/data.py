@@ -82,10 +82,16 @@ def split(*args, train_frac=0.8, val_frac=0.1, test_frac=0.1, seed=0):
     div1 = train
     div2 = train + val
 
+    idx = np.arange(N)
+    rng.shuffle(idx)
+    idx_tr = idx[:div1]
+    idx_va = idx[div1:div2]
+    idx_te = idx[div2:]
+
     if len(args) == 1:
-        return args[0][:div1], args[0][div1:div2], args[0][div2:]
+        return args[0][idx_tr], args[0][idx_va], args[0][idx_te]
     else:
-        return ((x[:div1], x[div1:div2], x[div2:]) for x in args)
+        return ((x[idx_tr], x[idx_va], x[idx_te]) for x in args)
 
 
 def dataloader(*args, batch_size=64, seed=0):
