@@ -5,6 +5,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 from os import makedirs
 from functools import reduce
+from collections import defaultdict
 
 
 EXPERIMENT_DIR = '/scratch/ch4407/lbc/experiments'
@@ -86,11 +87,7 @@ class Experiment():
             "loss":  loss_hyperparams,
         }
 
-        self.history = {
-            "epoch": [],
-            "loss_tr": [],
-            "loss_val": [],
-        }
+        self.history = defaultdict(list)
 
         self.checkpoints = []
 
