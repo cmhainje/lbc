@@ -149,7 +149,7 @@ def bias_subtract(d, b):
     return bsub
 
 
-def squash(image):
+def squash_old(image):
     """given a bias-subtracted image, normalize pixel values approximately into the interval (0, 1)
     (note: normalization is nonlinear, some values may be slightly negative)"""
     x = np.copy(image).astype(np.float64)
@@ -157,6 +157,16 @@ def squash(image):
     x[mask] -= np.percentile(x[mask], 0.01)
     x[mask] /= np.percentile(x[mask], 99.9)
     x[mask] = np.tanh(2 * x[mask])
+    return x
+
+
+def squash(image):
+    """2024-03-12"""
+    x = np.copy(image).astype(np.float64)
+    mask = np.count_nonzero(x, axis=1) > 0
+    x[mask] -= np.median(x[mask])
+    x[mask] /= np.percentile(x[mask], 99.9)
+    x[mask] = np.tanh(x[mask])
     return x
 
 
@@ -172,9 +182,17 @@ def wrangle_image(filename):
     # quads = [squash(q) for q in quads]
 
     # for now, we only care about the bottom left quadrant
-    x = squash(
-        bias_subtract(
-            *split_by_amplifier(image, red=('-r-' in filename))[2]
-        )
-    )
-    return x[800:928, 800:928]
+
+    # old
+    # x = squash(
+    #     bias_subtract(
+    #         *split_by_amplifier(image, red=('-r-' in filename))[2]
+    #     )
+    # )
+    # return x[800:928, 800:928]
+
+    # updated 2024-03-12
+    x = bias_subtract(
+        *split_by_amplifier(image, red=('-r1-' in filename))[2]
+    )[800:928, 800:928]
+    return squash(x)
