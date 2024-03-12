@@ -30,7 +30,7 @@ files_r = sorted(glob(join(args.src, '*', f'*-r1-*')))
 files_b = sorted(glob(join(args.src, '*', f'*-b1-*')))
 print(len(files_r), 'red files found.')
 print(len(files_b), 'blue files found.')
-assert files_r == files_b
+assert len(files_r) == len(files_b)
 
 idx_split = dutil.split(np.arange(len(files_r)), seed=120)
 
