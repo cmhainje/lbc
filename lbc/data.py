@@ -6,7 +6,7 @@ from os.path import join
 
 
 RAW_DIR = '/scratch/ch4407/lbc/data'
-DATA_DIR = '/scratch/ch4407/lbc/data-processed'
+DATA_DIR = '/scratch/ch4407/lbc/data-'
 
 
 # *** UTILITIES FOR WORKING WITH PROCESSED DATA ***
@@ -33,36 +33,36 @@ def _normalize_which(which):
     return which
 
 
-def load(which='train', flavor='arc', camera='r'):
+def load(which='train', flavor='arc', camera='r', dset_name='processed'):
     """Loads cached train/val/test datasets."""
     flavor = _normalize_flavor(flavor)
     camera = _normalize_camera(camera)
     which  = _normalize_which(which)
 
-    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    prefix = join(DATA_DIR + dset_name, flavor + 's', f'{which}_{camera}_')
     images = np.load(prefix + 'images.npy')
     metadata = pd.read_csv(prefix + 'metadata.csv', sep=';')
     return images, metadata
 
 
-def load_images(which='train', flavor='arc', camera='r'):
+def load_images(which='train', flavor='arc', camera='r', dset_name='processed'):
     """Loads cached train/val/test datasets."""
     flavor = _normalize_flavor(flavor)
     camera = _normalize_camera(camera)
     which  = _normalize_which(which)
 
-    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    prefix = join(DATA_DIR + dset_name, flavor + 's', f'{which}_{camera}_')
     images = np.load(prefix + 'images.npy')
     return images
 
 
-def load_metadata(which='train', flavor='arc', camera='r'):
+def load_metadata(which='train', flavor='arc', camera='r', dset_name='processed'):
     """Loads cached train/val/test datasets."""
     flavor = _normalize_flavor(flavor)
     camera = _normalize_camera(camera)
     which  = _normalize_which(which)
 
-    prefix = join(DATA_DIR, flavor + 's', f'{which}_{camera}_')
+    prefix = join(DATA_DIR + dset_name, flavor + 's', f'{which}_{camera}_')
     metadata = pd.read_csv(prefix + 'metadata.csv', sep=';')
     return metadata
 

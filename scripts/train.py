@@ -6,7 +6,7 @@ import cloudpickle
 import argparse
 
 from lbc.models.base_tanh import AutoEncoder
-from lbc.losses.mse_arctanh import loss
+from lbc.losses.mse import loss
 from lbc.data import load_images, dataloader
 from lbc.experiments import Experiment
 
@@ -26,8 +26,8 @@ ap.add_argument('--checkpoint_freq', default=10_000, type=int)
 args = ap.parse_args()
 
 # Load data
-X_train = load_images(which='train', camera=args.camera)
-X_val   = load_images(which='val',   camera=args.camera)
+X_train = load_images(which='train', camera=args.camera, dset_name='prep0312')
+X_val   = load_images(which='val',   camera=args.camera, dset_name='prep0312')
 
 
 # Instantiate model and optimizer
@@ -47,13 +47,14 @@ model = AutoEncoder(key=key, **model_hyper)
 optim = optax.adamw(**optim_hyper)
 opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
-# Setup experiment
+# Set up experiment
 exp = Experiment(
     model.__class__, optax.adamw, loss,
     model_hyperparams=model_hyper,
     optim_hyperparams=optim_hyper,
     loss_hyperparams=loss_hyper,
     camera=args.camera,
+    dset_name='prep0312',
     seed=seed,
     load_existing_if_match=True
 )
