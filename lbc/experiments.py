@@ -99,7 +99,8 @@ class Experiment():
                     and metadata["hyperparams"] == self.hyperparams
                     and metadata["metadata"] == self.metadata
                 ):
-                    return Experiment.load(UUID(id))
+                    self = Experiment.load(UUID(id))
+                    return
 
         # serialize the experiment and write metadata to global store
         self.serialize()
