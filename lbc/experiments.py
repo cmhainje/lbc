@@ -99,6 +99,7 @@ class Experiment():
                     and metadata["hyperparams"] == self.hyperparams
                     and metadata["metadata"] == self.metadata
                 ):
+                    print("Matching experiment found, loading...")
                     self = Experiment.load(UUID(id))
                     return
 
