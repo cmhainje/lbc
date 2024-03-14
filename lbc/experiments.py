@@ -38,6 +38,14 @@ def _update_store(experiment):
     }
     _save_store(store)
 
+def _remove_from_store(experiment_id: UUID):
+    store = _load_store()
+    try:
+        del store[experiment_id.hex]
+    except KeyError:
+        pass
+    _save_store(store)
+
 
 def query(
     model=None, optim=None, loss=None,
@@ -58,6 +66,18 @@ def query(
         ))
 
     return { id: exp for id, exp in _load_store().items() if _match(exp) }
+
+
+def remove(exp_ids):
+    from shutil import rmtree
+
+    exp_ids = set((UUID(_id) if not isinstance(_id, UUID) else _id) for _id in exp_ids)
+    for _id in exp_ids:
+        _remove_from_store(_id)
+        try:
+            rmtree(f'{EXPERIMENT_DIR}/{_id.hex}')
+        except FileNotFoundError:
+            pass
 
 
 class Experiment():
