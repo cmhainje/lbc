@@ -65,6 +65,10 @@ print(f'{len(matches)} BOSS summary tables found. Parsing...')
 for match in tqdm(matches, desc='Parsing', unit='table'):
     lines = match[0].strip().split('\n')
 
+    if lines[0].startswith(">"):
+        # don't read tables in email replies
+        continue
+
     # There are two completely different tables that I've seen appear in
     # the BOSS data summary. Assuming they're the only two...
 
@@ -80,6 +84,8 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
         arc_frames, flat_frames = set(), set()
         for line in table:
             chunks = line.strip().split()
+            if chunks[-1] == 'HART':
+                continue
             try:
                 frame_num = chunks[2].split('-')[1]
                 flav = chunks[5]
@@ -96,9 +102,6 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
 
         arcs[mjd] = sorted(list(arc_frames))
         flats[mjd] = sorted(list(flat_frames))
-
-    elif lines[0].startswith(">"):
-        continue
 
     else:
         if (
@@ -121,7 +124,7 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
             if line.startswith('>') or line.startswith('-'):
                 continue
             try:
-                exp, flav, _, _, _ = line.split()[-5:]
+                exp, flav, _, _, hart = line.split()[-5:]
             except:
                 print(header)
                 print("===")
@@ -129,6 +132,8 @@ for match in tqdm(matches, desc='Parsing', unit='table'):
                 print("===")
                 print(match[0])
                 raise RuntimeError('borked!')
+            if hart in ['Left', 'Right']:
+                continue
             if flav == 'Arc':
                 arc_frames.add(exp)
             elif flav == 'Flat':
