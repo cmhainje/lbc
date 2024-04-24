@@ -5,8 +5,8 @@ import optax
 import cloudpickle
 import argparse
 
-from lbc.models.base_tanh import AutoEncoder
-from lbc.losses.mse import loss
+from lbc.models.double_tanh import AutoEncoder
+from lbc.losses.mse_grow_mask import loss
 from lbc.data import load_images, dataloader
 from lbc.experiments import Experiment
 
